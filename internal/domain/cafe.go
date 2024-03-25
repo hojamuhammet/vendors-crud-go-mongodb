@@ -2,7 +2,7 @@ package domain
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type CommonTheatreRequest struct {
+type CommonCafeRequest struct {
 	Cover          string   `json:"cover" bson:"cover"`
 	Type           string   `json:"type" bson:"type"`
 	Name           string   `json:"name" bson:"name"`
@@ -14,7 +14,7 @@ type CommonTheatreRequest struct {
 	Tags           []string `json:"tags" bson:"tags"`
 }
 
-type CommonTheatreResponse struct {
+type CommonCafeResponse struct {
 	ID             primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Cover          string             `json:"cover" bson:"cover"`
 	Type           string             `json:"type" bson:"type"`
@@ -27,8 +27,8 @@ type CommonTheatreResponse struct {
 	Tags           []string           `json:"tags" bson:"tags"`
 }
 
-type GetTheatreResponse CommonTheatreResponse
-type CreateTheatreRequest CommonTheatreRequest
-type CreateTheatreResponse CommonTheatreResponse
-type UpdateTheatreRequest CommonTheatreRequest
-type UpdateTheatreResponse CommonTheatreResponse
+type GetCafeResponse CommonCafeResponse
+type CreateCafeRequest CommonCafeRequest
+type CreateCafeResponse CommonCafeResponse
+type UpdateCafeRequest CommonCafeRequest
+type UpdateCafeResponse CommonCafeResponse
