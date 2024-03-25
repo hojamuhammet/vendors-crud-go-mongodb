@@ -11,6 +11,7 @@ type CommonCinemaRequest struct {
 	Websites       []string `json:"websites" bson:"websites"`
 	SocialNetworks []string `json:"social_networks" bson:"social_networks"`
 	Media          []string `json:"media" bson:"media"`
+	Tags           []string `json:"tags" bson:"tags"`
 }
 
 type CommonCinemaResponse struct {
@@ -23,6 +24,7 @@ type CommonCinemaResponse struct {
 	Websites       []string           `json:"websites" bson:"websites"`
 	SocialNetworks []string           `json:"social_networks" bson:"social_networks"`
 	Media          []string           `json:"media" bson:"media"`
+	Tags           []string           `json:"tags" bson:"tags"`
 }
 
 type GetCinemaResponse CommonCinemaResponse
