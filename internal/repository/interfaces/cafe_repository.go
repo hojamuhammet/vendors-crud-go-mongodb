@@ -12,8 +12,8 @@ type CafeRepository interface {
 	GetAllCafes(page, pageSize int) ([]*domain.GetCafeResponse, error)
 	GetTotalCafesCount() (int, error)
 	GetCafeByID(id primitive.ObjectID) (*domain.GetCafeResponse, error)
-	CreateCafe(request *domain.CreateCinemaRequest) (*domain.CreateCafeResponse, error)
-	UpdateCafe(id primitive.ObjectID, request *domain.UpdateCinemaRequest) (*domain.UpdateCafeResponse, error)
+	CreateCafe(request *domain.CreateCafeRequest) (*domain.CreateCafeResponse, error)
+	UpdateCafe(id primitive.ObjectID, request *domain.UpdateCafeRequest) (*domain.UpdateCafeResponse, error)
 	DeleteCafe(id primitive.ObjectID) error
 	SearchCafes(query string, page int, pageSize int) ([]*domain.GetCafeResponse, error)
 	FilterCafesByTags(tags []string, page int, pageSize int) ([]*domain.GetCafeResponse, error)
