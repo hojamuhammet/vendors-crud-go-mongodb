@@ -15,6 +15,7 @@ type CommonCinemaRequest struct {
 
 type CommonCinemaResponse struct {
 	ID             primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Cover          string             `json:"cover" bson:"cover"`
 	Type           string             `json:"type" bson:"type"`
 	Name           string             `json:"name" bson:"name"`
 	Location       string             `json:"location" bson:"location"`
