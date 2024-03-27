@@ -80,7 +80,7 @@ func (r *MongoDBCafeRepository) GetCafeByID(id primitive.ObjectID) (*domain.GetC
 	return &cafe, nil
 }
 
-func (r *MongoDBCafeRepository) Createcafe(cafe *domain.CreateCafeRequest) (*domain.CreateCafeResponse, error) {
+func (r *MongoDBCafeRepository) CreateCafe(cafe *domain.CreateCafeRequest) (*domain.CreateCafeResponse, error) {
 	c := domain.CreateCafeResponse{
 		Cover:          cafe.Cover,
 		Type:           cafe.Type,
