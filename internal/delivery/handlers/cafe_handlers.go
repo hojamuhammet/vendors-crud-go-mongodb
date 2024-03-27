@@ -137,7 +137,7 @@ func (h *CafeHandler) CreateCafeHandler(w http.ResponseWriter, r *http.Request) 
 	cafe, err := h.CafeService.CreateCafe(&createCafeRequest)
 	if err != nil {
 		slog.Error("Error creating cafe: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.InternalServerError, fmt.Sprintf("Error creating Cafe: %v", err))
+		utils.RespondWithErrorJSON(w, status.InternalServerError, fmt.Sprintf("Error creating cafe: %v", err))
 		return
 	}
 
@@ -189,9 +189,9 @@ func (h *CafeHandler) UpdateCafeHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *CafeHandler) DeleteCafe(w http.ResponseWriter, r *http.Request) {
-	CafeID := chi.URLParam(r, "id")
+	cafeID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(CafeID)
+	objectID, err := primitive.ObjectIDFromHex(cafeID)
 	if err != nil {
 		slog.Error("Invalid cafe ID: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidCafeID)
