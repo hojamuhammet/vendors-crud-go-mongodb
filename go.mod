@@ -3,6 +3,7 @@ module vendors
 go 1.21.5
 
 require (
+	github.com/go-chi/chi/v5 v5.0.12
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	go.mongodb.org/mongo-driver v1.14.0
 )
