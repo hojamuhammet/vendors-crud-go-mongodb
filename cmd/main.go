@@ -43,6 +43,28 @@ func main() {
 	cafeService := service.NewCafeService(cafeRepository)
 	routes.SetupCafeRouter(cafeRouter, cafeService)
 
+	cinemaRouter := chi.NewRouter()
+
+	mainRouter.Route("/api/cinema", func(r chi.Router) {
+		r.Mount("/", cinemaRouter)
+	})
+
+	cinemaCollection := database.GetDB().Collection("cinemas")
+	cinemaRepository := repository.NewMongoDBCinemaRepository(cinemaCollection)
+	cinemaService := service.NewCinemaService(cinemaRepository)
+	routes.SetupCinemaRouter(cinemaRouter, cinemaService)
+
+	theatreRouter := chi.NewRouter()
+
+	mainRouter.Route("/api/theatre", func(r chi.Router) {
+		r.Mount("/", theatreRouter)
+	})
+
+	theatreCollection := database.GetDB().Collection("theatres")
+	theatreRepository := repository.NewMongoDBTheatreRepository(theatreCollection)
+	theatreService := service.NewTheatreService(theatreRepository)
+	routes.SetupTheatreRouter(theatreRouter, theatreService)
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
