@@ -38,7 +38,7 @@ func (h *TheatreHandler) GetAllTheatresHandler(w http.ResponseWriter, r *http.Re
 
 	totalTheatres, err := h.TheatreService.GetTotalTheatresCount()
 	if err != nil {
-		slog.Error("Error getting total Theatres count: ", utils.Err(err))
+		slog.Error("Error getting total theatres count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
