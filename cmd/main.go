@@ -65,6 +65,17 @@ func main() {
 	theatreService := service.NewTheatreService(theatreRepository)
 	routes.SetupTheatreRouter(theatreRouter, theatreService)
 
+	exhibitionRouter := chi.NewRouter()
+
+	mainRouter.Route("/api/exhibition", func(r chi.Router) {
+		r.Mount("/", exhibitionRouter)
+	})
+
+	exhibitionCollection := database.GetDB().Collection("exhibitions")
+	exhibitionRepository := repository.NewMongoDBExhibitionRepository(exhibitionCollection)
+	exhibitionService := service.NewExhibitionService(exhibitionRepository)
+	routes.SetupExhibitionRouter(exhibitionRouter, exhibitionService)
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
