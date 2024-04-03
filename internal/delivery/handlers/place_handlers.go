@@ -17,12 +17,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type CinemaHandler struct {
-	CinemaService *service.CinemaService
-	Router        *chi.Mux
+type PlaceHandler struct {
+	PlaceService *service.PlaceService
+	Router       *chi.Mux
 }
 
-func (h *CinemaHandler) GetAllCinemasHandler(w http.ResponseWriter, r *http.Request) {
+type StatusMessage struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (h *PlaceHandler) GetAllPlacesHandler(w http.ResponseWriter, r *http.Request) {
 	page := 1      // Default page if not provided
 	pageSize := 10 // Default page size, adjust as needed
 
@@ -36,18 +41,18 @@ func (h *CinemaHandler) GetAllCinemasHandler(w http.ResponseWriter, r *http.Requ
 		page = pageNum
 	}
 
-	totalCinemas, err := h.CinemaService.GetTotalCinemasCount()
+	totalPlaces, err := h.PlaceService.GetTotalPlacesCount()
 	if err != nil {
-		slog.Error("Error getting total cinema count: ", utils.Err(err))
+		slog.Error("Error getting total places count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalCinemas) / float64(pageSize)))
+	totalPages := int(math.Ceil(float64(totalPlaces) / float64(pageSize)))
 
-	cinemas, err := h.CinemaService.GetAllCinemas(page, pageSize)
+	places, err := h.PlaceService.GetAllPlaces(page, pageSize)
 	if err != nil {
-		slog.Error("Error getting cinemas: ", utils.Err(err))
+		slog.Error("Error getting places: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
@@ -60,7 +65,7 @@ func (h *CinemaHandler) GetAllCinemasHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	var nextPage interface{}
-	if len(cinemas) == pageSize {
+	if len(places) == pageSize {
 		nextPage = page + 1
 	} else {
 		nextPage = nil
@@ -89,116 +94,116 @@ func (h *CinemaHandler) GetAllCinemasHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	responseData := map[string]interface{}{
-		"cinemas":    cinemas,
+		"places":     places,
 		"pagination": pagination,
 	}
 
 	utils.RespondWithJSON(w, status.OK, responseData)
 }
 
-func (h *CinemaHandler) GetCinemaByIDHandler(w http.ResponseWriter, r *http.Request) {
-	cinemaID := chi.URLParam(r, "id")
+func (h *PlaceHandler) GetPlaceByIDHandler(w http.ResponseWriter, r *http.Request) {
+	placeID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(cinemaID)
+	objectID, err := primitive.ObjectIDFromHex(placeID)
 	if err != nil {
-		slog.Error("Invalid cinema ID: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidCinemaID)
+		slog.Error("Invalid place ID: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidPlaceID)
 		return
 	}
 
-	cinema, err := h.CinemaService.GetCinemaByID(objectID)
+	place, err := h.PlaceService.GetPlaceByID(objectID)
 	if err != nil {
-		slog.Error("Error getting cinema by ID: ", utils.Err(err))
+		slog.Error("Error getting place by ID: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	if cinema == nil {
-		utils.RespondWithErrorJSON(w, status.NotFound, errs.CinemaNotFound)
+	if place == nil {
+		utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
 		return
 	}
 
-	utils.RespondWithJSON(w, status.OK, cinema)
+	utils.RespondWithJSON(w, status.OK, place)
 }
 
-func (h *CinemaHandler) CreateCinemaHandler(w http.ResponseWriter, r *http.Request) {
-	var createCinemaRequest domain.CreateCinemaRequest
-	err := json.NewDecoder(r.Body).Decode(&createCinemaRequest)
+func (h *PlaceHandler) CreatePlaceHandler(w http.ResponseWriter, r *http.Request) {
+	var createPlaceRequest domain.CreatePlaceRequest
+	err := json.NewDecoder(r.Body).Decode(&createPlaceRequest)
 	if err != nil {
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidRequestBody)
 		return
 	}
 
-	cinema, err := h.CinemaService.CreateCinema(&createCinemaRequest)
+	place, err := h.PlaceService.CreatePlace(&createPlaceRequest)
 	if err != nil {
-		slog.Error("Error creating cinema: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.InternalServerError, fmt.Sprintf("Error creating cinema: %v", err))
+		slog.Error("Error creating place: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.InternalServerError, fmt.Sprintf("Error creating place: %v", err))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(cinema)
+	json.NewEncoder(w).Encode(place)
 }
 
-func (h *CinemaHandler) UpdateCinemaHandler(w http.ResponseWriter, r *http.Request) {
-	cinemaID := chi.URLParam(r, "id")
+func (h *PlaceHandler) UpdatePlaceHandler(w http.ResponseWriter, r *http.Request) {
+	placeID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(cinemaID)
+	objectID, err := primitive.ObjectIDFromHex(placeID)
 	if err != nil {
-		slog.Error("Invalid cinema ID: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidCinemaID)
+		slog.Error("Invalid place ID: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidPlaceID)
 		return
 	}
 
-	existingCinema, err := h.CinemaService.GetCinemaByID(objectID)
+	existingPlace, err := h.PlaceService.GetPlaceByID(objectID)
 	if err != nil {
-		slog.Error("Error checking if cinema exists: ", utils.Err(err))
+		slog.Error("Error checking if place exists: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
-	if existingCinema == nil {
-		utils.RespondWithErrorJSON(w, status.NotFound, errs.CinemaNotFound)
+	if existingPlace == nil {
+		utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
 		return
 	}
 
-	var updateCinemaRequest domain.UpdateCinemaRequest
-	err = json.NewDecoder(r.Body).Decode(&updateCinemaRequest)
+	var updatePlaceRequest domain.UpdatePlaceRequest
+	err = json.NewDecoder(r.Body).Decode(&updatePlaceRequest)
 	if err != nil {
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidRequestBody)
 		return
 	}
 
-	cinema, err := h.CinemaService.UpdateCinema(objectID, &updateCinemaRequest)
+	place, err := h.PlaceService.UpdatePlace(objectID, &updatePlaceRequest)
 	if err != nil {
-		slog.Error("Error updating cinema: ", utils.Err(err))
-		if err.Error() == "cinema not found" {
-			utils.RespondWithErrorJSON(w, status.NotFound, errs.CinemaNotFound)
+		slog.Error("Error updating place: ", utils.Err(err))
+		if err.Error() == "place not found" {
+			utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
 		} else {
 			utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		}
 		return
 	}
 
-	utils.RespondWithJSON(w, status.OK, cinema)
+	utils.RespondWithJSON(w, status.OK, place)
 }
 
-func (h *CinemaHandler) DeleteCinema(w http.ResponseWriter, r *http.Request) {
-	cinemaID := chi.URLParam(r, "id")
+func (h *PlaceHandler) DeletePlace(w http.ResponseWriter, r *http.Request) {
+	placeID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(cinemaID)
+	objectID, err := primitive.ObjectIDFromHex(placeID)
 	if err != nil {
-		slog.Error("Invalid cinema ID: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidCafeID)
+		slog.Error("Invalid place ID: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidPlaceID)
 		return
 	}
 
-	err = h.CinemaService.DeleteCinema(objectID)
+	err = h.PlaceService.DeletePlace(objectID)
 	if err != nil {
-		if err.Error() == "cinema not found" {
-			utils.RespondWithErrorJSON(w, status.NotFound, errs.CafeNotFound)
+		if err.Error() == "place not found" {
+			utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
 		} else {
-			slog.Error("Error deleting cinema:", utils.Err(err))
+			slog.Error("Error deleting place:", utils.Err(err))
 			utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		}
 		return
@@ -206,13 +211,13 @@ func (h *CinemaHandler) DeleteCinema(w http.ResponseWriter, r *http.Request) {
 
 	response := StatusMessage{
 		Code:    200,
-		Message: "Cinema deleted successfully",
+		Message: "Place deleted successfully",
 	}
 
 	utils.RespondWithJSON(w, status.OK, response)
 }
 
-func (h *CinemaHandler) SearchCinemasHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PlaceHandler) SearchPlacesHandler(w http.ResponseWriter, r *http.Request) {
 	page := 1      // Default page if not provided
 	pageSize := 10 // Default page size, adjust as needed
 
@@ -226,20 +231,20 @@ func (h *CinemaHandler) SearchCinemasHandler(w http.ResponseWriter, r *http.Requ
 		page = pageNum
 	}
 
-	totalCinemas, err := h.CinemaService.GetTotalCinemasCount()
+	totalPlaces, err := h.PlaceService.GetTotalPlacesCount()
 	if err != nil {
-		slog.Error("Error getting total cinemas count: ", utils.Err(err))
+		slog.Error("Error getting total places count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalCinemas) / float64(pageSize)))
+	totalPages := int(math.Ceil(float64(totalPlaces) / float64(pageSize)))
 
 	query := r.URL.Query().Get("query")
 
-	cinemas, err := h.CinemaService.SearchCinemas(query, page, pageSize)
+	places, err := h.PlaceService.SearchPlaces(query, page, pageSize)
 	if err != nil {
-		slog.Error("Error searching cinemas: ", utils.Err(err))
+		slog.Error("Error searching places: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
@@ -252,7 +257,7 @@ func (h *CinemaHandler) SearchCinemasHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	var nextPage interface{}
-	if len(cinemas) == pageSize {
+	if len(places) == pageSize {
 		nextPage = page + 1
 	} else {
 		nextPage = nil
@@ -281,14 +286,14 @@ func (h *CinemaHandler) SearchCinemasHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	responseData := map[string]interface{}{
-		"cinemas":    cinemas,
+		"places":     places,
 		"pagination": pagination,
 	}
 
 	utils.RespondWithJSON(w, status.OK, responseData)
 }
 
-func (h *CinemaHandler) FilterCinemasByTagsHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PlaceHandler) FilterPlacesByTagsHandler(w http.ResponseWriter, r *http.Request) {
 	page := 1      // Default page if not provided
 	pageSize := 10 // Default page size, adjust as needed
 	queryTags := r.URL.Query()["tags"]
@@ -303,23 +308,23 @@ func (h *CinemaHandler) FilterCinemasByTagsHandler(w http.ResponseWriter, r *htt
 		page = pageNum
 	}
 
-	totalCinemas, err := h.CinemaService.GetTotalCinemasCount()
+	totalPlaces, err := h.PlaceService.GetTotalPlacesCount()
 	if err != nil {
-		slog.Error("Error getting total cinemas count: ", utils.Err(err))
+		slog.Error("Error getting total places count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalCinemas) / float64(pageSize)))
+	totalPages := int(math.Ceil(float64(totalPlaces) / float64(pageSize)))
 
 	if len(queryTags) == 0 {
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.MissingTags)
 		return
 	}
 
-	cinemas, err := h.CinemaService.FilterCinemasByTags(queryTags, page, pageSize)
+	places, err := h.PlaceService.FilterPlacesByTags(queryTags, page, pageSize)
 	if err != nil {
-		slog.Error("Error filtering cinemas by tags: ", utils.Err(err))
+		slog.Error("Error filtering places by tags: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
@@ -332,7 +337,7 @@ func (h *CinemaHandler) FilterCinemasByTagsHandler(w http.ResponseWriter, r *htt
 	}
 
 	var nextPage interface{}
-	if len(cinemas) == pageSize {
+	if len(places) == pageSize {
 		nextPage = page + 1
 	} else {
 		nextPage = nil
@@ -361,7 +366,7 @@ func (h *CinemaHandler) FilterCinemasByTagsHandler(w http.ResponseWriter, r *htt
 	}
 
 	responseData := map[string]interface{}{
-		"cinemas":    cinemas,
+		"places":     places,
 		"pagination": pagination,
 	}
 

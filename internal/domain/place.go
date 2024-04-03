@@ -2,7 +2,7 @@ package domain
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type CommonTheatreRequest struct {
+type CommonPlaceRequest struct {
 	Cover          string   `json:"cover" bson:"cover"`
 	Type           string   `json:"type" bson:"type"`
 	Name           string   `json:"name" bson:"name"`
@@ -12,9 +12,10 @@ type CommonTheatreRequest struct {
 	SocialNetworks []string `json:"social_networks" bson:"social_networks"`
 	Media          []string `json:"media" bson:"media"`
 	Tags           []string `json:"tags" bson:"tags"`
+	Categories     []string `json:"categories" bson:"categories"`
 }
 
-type CommonTheatreResponse struct {
+type CommonPlaceResponse struct {
 	ID             primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Cover          string             `json:"cover" bson:"cover"`
 	Type           string             `json:"type" bson:"type"`
@@ -25,10 +26,11 @@ type CommonTheatreResponse struct {
 	SocialNetworks []string           `json:"social_networks" bson:"social_networks"`
 	Media          []string           `json:"media" bson:"media"`
 	Tags           []string           `json:"tags" bson:"tags"`
+	Categories     []string           `json:"categories" bson:"categories"`
 }
 
-type GetTheatreResponse CommonTheatreResponse
-type CreateTheatreRequest CommonTheatreRequest
-type CreateTheatreResponse CommonTheatreResponse
-type UpdateTheatreRequest CommonTheatreRequest
-type UpdateTheatreResponse CommonTheatreResponse
+type GetPlaceResponse CommonPlaceResponse
+type CreatePlaceRequest CommonPlaceRequest
+type CreatePlaceResponse CommonPlaceResponse
+type UpdatePlaceRequest CommonPlaceRequest
+type UpdatePlaceResponse CommonPlaceResponse
