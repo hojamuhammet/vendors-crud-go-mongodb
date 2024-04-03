@@ -17,9 +17,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type PlaceHandler struct {
-	PlaceService *service.PlaceService
-	Router       *chi.Mux
+type VendorHandler struct {
+	VendorService *service.VendorService
+	Router        *chi.Mux
 }
 
 type StatusMessage struct {
@@ -27,7 +27,7 @@ type StatusMessage struct {
 	Message string `json:"message"`
 }
 
-func (h *PlaceHandler) GetAllPlacesHandler(w http.ResponseWriter, r *http.Request) {
+func (h *VendorHandler) GetAllVendorsHandler(w http.ResponseWriter, r *http.Request) {
 	page := 1      // Default page if not provided
 	pageSize := 10 // Default page size, adjust as needed
 
@@ -41,18 +41,18 @@ func (h *PlaceHandler) GetAllPlacesHandler(w http.ResponseWriter, r *http.Reques
 		page = pageNum
 	}
 
-	totalPlaces, err := h.PlaceService.GetTotalPlacesCount()
+	totalVendors, err := h.VendorService.GetTotalVendorsCount()
 	if err != nil {
-		slog.Error("Error getting total places count: ", utils.Err(err))
+		slog.Error("Error getting total vendors count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalPlaces) / float64(pageSize)))
+	totalPages := int(math.Ceil(float64(totalVendors) / float64(pageSize)))
 
-	places, err := h.PlaceService.GetAllPlaces(page, pageSize)
+	vendors, err := h.VendorService.GetAllVendors(page, pageSize)
 	if err != nil {
-		slog.Error("Error getting places: ", utils.Err(err))
+		slog.Error("Error getting vendors: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
@@ -65,7 +65,7 @@ func (h *PlaceHandler) GetAllPlacesHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var nextPage interface{}
-	if len(places) == pageSize {
+	if len(vendors) == pageSize {
 		nextPage = page + 1
 	} else {
 		nextPage = nil
@@ -94,116 +94,116 @@ func (h *PlaceHandler) GetAllPlacesHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	responseData := map[string]interface{}{
-		"places":     places,
+		"vendors":    vendors,
 		"pagination": pagination,
 	}
 
 	utils.RespondWithJSON(w, status.OK, responseData)
 }
 
-func (h *PlaceHandler) GetPlaceByIDHandler(w http.ResponseWriter, r *http.Request) {
-	placeID := chi.URLParam(r, "id")
+func (h *VendorHandler) GetVendorByIDHandler(w http.ResponseWriter, r *http.Request) {
+	vendorID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(placeID)
+	objectID, err := primitive.ObjectIDFromHex(vendorID)
 	if err != nil {
-		slog.Error("Invalid place ID: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidPlaceID)
+		slog.Error("Invalid vendor ID: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidVendorID)
 		return
 	}
 
-	place, err := h.PlaceService.GetPlaceByID(objectID)
+	vendor, err := h.VendorService.GetVendorByID(objectID)
 	if err != nil {
-		slog.Error("Error getting place by ID: ", utils.Err(err))
+		slog.Error("Error getting vendor by ID: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	if place == nil {
-		utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
+	if vendor == nil {
+		utils.RespondWithErrorJSON(w, status.NotFound, errs.VendorNotFound)
 		return
 	}
 
-	utils.RespondWithJSON(w, status.OK, place)
+	utils.RespondWithJSON(w, status.OK, vendor)
 }
 
-func (h *PlaceHandler) CreatePlaceHandler(w http.ResponseWriter, r *http.Request) {
-	var createPlaceRequest domain.CreatePlaceRequest
-	err := json.NewDecoder(r.Body).Decode(&createPlaceRequest)
+func (h *VendorHandler) CreateVendorHandler(w http.ResponseWriter, r *http.Request) {
+	var createVendorRequest domain.CreateVendorRequest
+	err := json.NewDecoder(r.Body).Decode(&createVendorRequest)
 	if err != nil {
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidRequestBody)
 		return
 	}
 
-	place, err := h.PlaceService.CreatePlace(&createPlaceRequest)
+	vendor, err := h.VendorService.CreateVendor(&createVendorRequest)
 	if err != nil {
-		slog.Error("Error creating place: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.InternalServerError, fmt.Sprintf("Error creating place: %v", err))
+		slog.Error("Error creating vendor: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.InternalServerError, fmt.Sprintf("Error creating vendor: %v", err))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(place)
+	json.NewEncoder(w).Encode(vendor)
 }
 
-func (h *PlaceHandler) UpdatePlaceHandler(w http.ResponseWriter, r *http.Request) {
-	placeID := chi.URLParam(r, "id")
+func (h *VendorHandler) UpdateVendorHandler(w http.ResponseWriter, r *http.Request) {
+	vendorID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(placeID)
+	objectID, err := primitive.ObjectIDFromHex(vendorID)
 	if err != nil {
-		slog.Error("Invalid place ID: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidPlaceID)
+		slog.Error("Invalid vendor ID: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidVendorID)
 		return
 	}
 
-	existingPlace, err := h.PlaceService.GetPlaceByID(objectID)
+	existingVendor, err := h.VendorService.GetVendorByID(objectID)
 	if err != nil {
-		slog.Error("Error checking if place exists: ", utils.Err(err))
+		slog.Error("Error checking if vendor exists: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
-	if existingPlace == nil {
-		utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
+	if existingVendor == nil {
+		utils.RespondWithErrorJSON(w, status.NotFound, errs.VendorNotFound)
 		return
 	}
 
-	var updatePlaceRequest domain.UpdatePlaceRequest
-	err = json.NewDecoder(r.Body).Decode(&updatePlaceRequest)
+	var updateVendorRequest domain.UpdateVendorRequest
+	err = json.NewDecoder(r.Body).Decode(&updateVendorRequest)
 	if err != nil {
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidRequestBody)
 		return
 	}
 
-	place, err := h.PlaceService.UpdatePlace(objectID, &updatePlaceRequest)
+	vendor, err := h.VendorService.UpdateVendor(objectID, &updateVendorRequest)
 	if err != nil {
-		slog.Error("Error updating place: ", utils.Err(err))
-		if err.Error() == "place not found" {
-			utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
+		slog.Error("Error updating vendor: ", utils.Err(err))
+		if err.Error() == "vendor not found" {
+			utils.RespondWithErrorJSON(w, status.NotFound, errs.VendorNotFound)
 		} else {
 			utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		}
 		return
 	}
 
-	utils.RespondWithJSON(w, status.OK, place)
+	utils.RespondWithJSON(w, status.OK, vendor)
 }
 
-func (h *PlaceHandler) DeletePlace(w http.ResponseWriter, r *http.Request) {
-	placeID := chi.URLParam(r, "id")
+func (h *VendorHandler) DeleteVendor(w http.ResponseWriter, r *http.Request) {
+	vendorID := chi.URLParam(r, "id")
 
-	objectID, err := primitive.ObjectIDFromHex(placeID)
+	objectID, err := primitive.ObjectIDFromHex(vendorID)
 	if err != nil {
-		slog.Error("Invalid place ID: ", utils.Err(err))
-		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidPlaceID)
+		slog.Error("Invalid vendor ID: ", utils.Err(err))
+		utils.RespondWithErrorJSON(w, status.BadRequest, errs.InvalidVendorID)
 		return
 	}
 
-	err = h.PlaceService.DeletePlace(objectID)
+	err = h.VendorService.DeleteVendor(objectID)
 	if err != nil {
-		if err.Error() == "place not found" {
-			utils.RespondWithErrorJSON(w, status.NotFound, errs.PlaceNotFound)
+		if err.Error() == "vendor not found" {
+			utils.RespondWithErrorJSON(w, status.NotFound, errs.VendorNotFound)
 		} else {
-			slog.Error("Error deleting place:", utils.Err(err))
+			slog.Error("Error deleting vendor:", utils.Err(err))
 			utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		}
 		return
@@ -211,13 +211,13 @@ func (h *PlaceHandler) DeletePlace(w http.ResponseWriter, r *http.Request) {
 
 	response := StatusMessage{
 		Code:    200,
-		Message: "Place deleted successfully",
+		Message: "Vendor deleted successfully",
 	}
 
 	utils.RespondWithJSON(w, status.OK, response)
 }
 
-func (h *PlaceHandler) SearchPlacesHandler(w http.ResponseWriter, r *http.Request) {
+func (h *VendorHandler) SearchVendorsHandler(w http.ResponseWriter, r *http.Request) {
 	page := 1      // Default page if not provided
 	pageSize := 10 // Default page size, adjust as needed
 
@@ -231,20 +231,20 @@ func (h *PlaceHandler) SearchPlacesHandler(w http.ResponseWriter, r *http.Reques
 		page = pageNum
 	}
 
-	totalPlaces, err := h.PlaceService.GetTotalPlacesCount()
+	totalVendors, err := h.VendorService.GetTotalVendorsCount()
 	if err != nil {
-		slog.Error("Error getting total places count: ", utils.Err(err))
+		slog.Error("Error getting total vendor count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalPlaces) / float64(pageSize)))
+	totalPages := int(math.Ceil(float64(totalVendors) / float64(pageSize)))
 
 	query := r.URL.Query().Get("query")
 
-	places, err := h.PlaceService.SearchPlaces(query, page, pageSize)
+	vendors, err := h.VendorService.SearchVendors(query, page, pageSize)
 	if err != nil {
-		slog.Error("Error searching places: ", utils.Err(err))
+		slog.Error("Error searching vendors: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
@@ -257,7 +257,7 @@ func (h *PlaceHandler) SearchPlacesHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var nextPage interface{}
-	if len(places) == pageSize {
+	if len(vendors) == pageSize {
 		nextPage = page + 1
 	} else {
 		nextPage = nil
@@ -286,14 +286,14 @@ func (h *PlaceHandler) SearchPlacesHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	responseData := map[string]interface{}{
-		"places":     places,
+		"vendors":    vendors,
 		"pagination": pagination,
 	}
 
 	utils.RespondWithJSON(w, status.OK, responseData)
 }
 
-func (h *PlaceHandler) FilterPlacesByTagsHandler(w http.ResponseWriter, r *http.Request) {
+func (h *VendorHandler) FilterVendorsByTagsHandler(w http.ResponseWriter, r *http.Request) {
 	page := 1      // Default page if not provided
 	pageSize := 10 // Default page size, adjust as needed
 	queryTags := r.URL.Query()["tags"]
@@ -308,23 +308,23 @@ func (h *PlaceHandler) FilterPlacesByTagsHandler(w http.ResponseWriter, r *http.
 		page = pageNum
 	}
 
-	totalPlaces, err := h.PlaceService.GetTotalPlacesCount()
+	totalVendors, err := h.VendorService.GetTotalVendorsCount()
 	if err != nil {
-		slog.Error("Error getting total places count: ", utils.Err(err))
+		slog.Error("Error getting total vendors count: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalPlaces) / float64(pageSize)))
+	totalPages := int(math.Ceil(float64(totalVendors) / float64(pageSize)))
 
 	if len(queryTags) == 0 {
 		utils.RespondWithErrorJSON(w, status.BadRequest, errs.MissingTags)
 		return
 	}
 
-	places, err := h.PlaceService.FilterPlacesByTags(queryTags, page, pageSize)
+	vendors, err := h.VendorService.FilterVendorsByTags(queryTags, page, pageSize)
 	if err != nil {
-		slog.Error("Error filtering places by tags: ", utils.Err(err))
+		slog.Error("Error filtering vendors by tags: ", utils.Err(err))
 		utils.RespondWithErrorJSON(w, status.InternalServerError, errs.InternalServerError)
 		return
 	}
@@ -337,7 +337,7 @@ func (h *PlaceHandler) FilterPlacesByTagsHandler(w http.ResponseWriter, r *http.
 	}
 
 	var nextPage interface{}
-	if len(places) == pageSize {
+	if len(vendors) == pageSize {
 		nextPage = page + 1
 	} else {
 		nextPage = nil
@@ -366,7 +366,7 @@ func (h *PlaceHandler) FilterPlacesByTagsHandler(w http.ResponseWriter, r *http.
 	}
 
 	responseData := map[string]interface{}{
-		"places":     places,
+		"vendors":    vendors,
 		"pagination": pagination,
 	}
 

@@ -2,7 +2,7 @@ package domain
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type CommonPlaceRequest struct {
+type CommonVendorRequest struct {
 	Cover          string   `json:"cover" bson:"cover"`
 	Type           string   `json:"type" bson:"type"`
 	Name           string   `json:"name" bson:"name"`
@@ -15,7 +15,7 @@ type CommonPlaceRequest struct {
 	Categories     []string `json:"categories" bson:"categories"`
 }
 
-type CommonPlaceResponse struct {
+type CommonVendorResponse struct {
 	ID             primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Cover          string             `json:"cover" bson:"cover"`
 	Type           string             `json:"type" bson:"type"`
@@ -29,8 +29,8 @@ type CommonPlaceResponse struct {
 	Categories     []string           `json:"categories" bson:"categories"`
 }
 
-type GetPlaceResponse CommonPlaceResponse
-type CreatePlaceRequest CommonPlaceRequest
-type CreatePlaceResponse CommonPlaceResponse
-type UpdatePlaceRequest CommonPlaceRequest
-type UpdatePlaceResponse CommonPlaceResponse
+type GetVendorResponse CommonVendorResponse
+type CreateVendorRequest CommonVendorRequest
+type CreateVendorResponse CommonVendorResponse
+type UpdateVendorRequest CommonVendorRequest
+type UpdateVendorResponse CommonVendorResponse

@@ -7,17 +7,17 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupPlaceRouter(placeRouter *chi.Mux, placeService *service.PlaceService) {
-	placeHandler := handlers.PlaceHandler{
-		Router:       placeRouter,
-		PlaceService: placeService,
+func SetupVendorRouter(vendorRouter *chi.Mux, vendorService *service.VendorService) {
+	vendorHandler := handlers.VendorHandler{
+		Router:        vendorRouter,
+		VendorService: vendorService,
 	}
 
-	placeRouter.Get("/", placeHandler.GetAllPlacesHandler)
-	placeRouter.Get("/{id}", placeHandler.GetPlaceByIDHandler)
-	placeRouter.Post("/", placeHandler.CreatePlaceHandler)
-	placeRouter.Put("/{id}", placeHandler.UpdatePlaceHandler)
-	placeRouter.Delete("/{id}", placeHandler.DeletePlace)
-	placeRouter.Get("/search", placeHandler.SearchPlacesHandler)
-	placeRouter.Get("/filter/tags", placeHandler.FilterPlacesByTagsHandler)
+	vendorRouter.Get("/", vendorHandler.GetAllVendorsHandler)
+	vendorRouter.Get("/{id}", vendorHandler.GetVendorByIDHandler)
+	vendorRouter.Post("/", vendorHandler.CreateVendorHandler)
+	vendorRouter.Put("/{id}", vendorHandler.UpdateVendorHandler)
+	vendorRouter.Delete("/{id}", vendorHandler.DeleteVendor)
+	vendorRouter.Get("/search", vendorHandler.SearchVendorsHandler)
+	vendorRouter.Get("/filter/tags", vendorHandler.FilterVendorsByTagsHandler)
 }

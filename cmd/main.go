@@ -37,16 +37,16 @@ func main() {
 
 	mainRouter := chi.NewRouter()
 
-	placeRouter := chi.NewRouter()
+	vendorRouter := chi.NewRouter()
 
-	mainRouter.Route("/api/place", func(r chi.Router) {
-		r.Mount("/", placeRouter)
+	mainRouter.Route("/api/vendor", func(r chi.Router) {
+		r.Mount("/", vendorRouter)
 	})
 
-	placeCollection := database.GetDB().Collection("places")
-	placeRepository := repository.NewMongoDBPlaceRepository(placeCollection)
-	placeService := service.NewPlaceService(placeRepository)
-	routes.SetupPlaceRouter(placeRouter, placeService)
+	vendorCollection := database.GetDB().Collection("vendors")
+	vendorRepository := repository.NewMongoDBVendorRepository(vendorCollection)
+	vendorService := service.NewVendorService(vendorRepository)
+	routes.SetupVendorRouter(vendorRouter, vendorService)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
