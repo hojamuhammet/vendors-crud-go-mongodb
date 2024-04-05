@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"vendors/internal/domain"
-	"vendors/internal/service"
+	service "vendors/internal/service/interfaces"
 	"vendors/pkg/lib/errs"
 	"vendors/pkg/lib/status"
 	"vendors/pkg/lib/utils"
@@ -18,7 +18,7 @@ import (
 )
 
 type VendorHandler struct {
-	VendorService *service.VendorService
+	VendorService service.VendorService
 	Router        *chi.Mux
 }
 
